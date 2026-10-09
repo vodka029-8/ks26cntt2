@@ -1,0 +1,25 @@
+
+Phần 1: Phân tích lỗi
+
+Trong hình ảnh, chuỗi lệnh của Nam đã vấp phải 3 lỗi logic và cú pháp nghiêm trọng khiến Terminal báo lỗi đỏ:
+1. Lỗi tách tham số do khoảng trắng ở Lệnh 1 (mkdir Shopee Projects)
+	• Giải thích thông báo lỗi: PowerShell phân tách các tham số bằng khoảng trắng. Khi Nam gõ mkdir Shopee Projects, PowerShell sẽ hiểu là Nam muốn tạo cùng lúc hai thư mục riêng biệt: một thư mục tên Shopee và một thư mục tên Projects. Do đó, thư mục duy nhất mang tên Shopee Projects không hề được tạo ra.
+2. Lỗi sai đường dẫn tương đối ở Lệnh 2 (cd Shopee Projects)
+	• Giải thích thông báo lỗi: Terminal sẽ báo lỗi đỏ Cannot find path '...' because it does not exist.. Lý do là vì ở Lệnh 1 hệ thống chỉ tạo ra thư mục Shopee, khi Nam cố gắng di chuyển vào thư mục Shopee Projects (không tồn tại), PowerShell sẽ không tìm thấy đường dẫn này.
+	• Lưu ý cú pháp: Ngay cả khi thư mục đó có tồn tại đi chăng nữa, việc gõ cd Shopee Projects không có dấu ngoặc kép vẫn sẽ bị báo lỗi A positional parameter cannot be found that accepts argument 'Projects' (do Projects bị coi là tham số thừa vị trí thứ hai).
+3. Lỗi logic ở Lệnh 4 khi dùng Copy-Item mà đích đến chứa thư mục nguồn
+	• Hành vi lệnh: Copy-Item src -Destination src-backup -Recurse
+	• Giải thích thông báo lỗi: Ở Lệnh 3, Nam đã tạo cấu trúc src\assets\images bên trong thư mục hiện tại. Khi thực hiện Lệnh 4, Nam muốn sao lưu thư mục src thành src-backup. Tuy nhiên, lệnh này sẽ gây ra lỗi vòng lặp vô hạn (Infinite loop) hoặc lỗi đường dẫn quá dài / không tìm thấy đích nếu thư mục src-backup chưa được tạo trước, hoặc PowerShell cố gắng đệ quy (-Recurse) sao chép chính nó vào bên trong nếu cấu trúc không tường minh. Thêm vào đó, do lỗi từ Lệnh 2 (không di chuyển được vào thư mục dự án), lệnh mkdir và Copy-Item này đang bị chạy sai vị trí (chạy ngay tại thư mục gốc C:\Users\Student), gây hỗn loạn cấu trúc file.
+
+Phần 2: Hoàn thiện (Giải pháp 3 dòng lệnh)
+
+Để giúp Nam hoàn thành toàn bộ cấu trúc thư mục dự án trên (Shopee Projects, các thư mục con src\assets\images, và tạo bản sao lưu src-backup) một cách chuẩn xác, không lỗi và gói gọn trong đúng 3 dòng lệnh, bạn viết lại như sau:
+powershell
+New-Item -Path ".\Shopee Projects\src\assets\images" -ItemType Directory -Force
+cd ".\Shopee Projects"
+Copy-Item -Path ".\src" -Destination ".\src-backup" -Recurse -Force
+Hãy thận trọng khi sử dụng mã.
+Giải thích chi tiết giải pháp:
+• Dòng 1: Sử dụng New-Item kết hợp tham số -Force. PowerShell sẽ tự động tạo toàn bộ cây thư mục từ cha đến con (Shopee Projects -> src -> assets -> images) chỉ trong một dòng lệnh duy nhất, và việc bọc đường dẫn trong dấu ngoặc kép "..." giải quyết triệt để lỗi khoảng trắng.
+• Dòng 2: Chuyển di chuyển (nhảy) vào đúng thư mục làm việc của dự án một cách an toàn bằng cd ".\Shopee Projects".
+• Dòng 3: Thực hiện sao chép đệ quy thư mục src sang thư mục mới src-backup một cách hợp lệ ngay tại thư mục hiện hành của dự án.
