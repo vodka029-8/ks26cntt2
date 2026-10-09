@@ -1,0 +1,15 @@
+Phần 1: So sánh hai giải pháp đường dẫn
+
+ Đường dẫn tuyệt đối (C:\Users\An-K26\FarmProject\data\logs.csv)
+	 Độ dài: Dài, chứa đầy đủ tên ổ đĩa và tất cả các thư mục cha.
+	 Tính di động: Kém. Khi gửi project cho người khác, script sẽ bị lỗi nếu máy của họ không có ổ C:\, không có user tên An-K26 hoặc cấu trúc thư mục bên ngoài bị thay đổi.
+ Đường dẫn tương đối (../data/logs.csv)
+	 Độ dài: Ngắn gọn, chỉ thể hiện sự dịch chuyển từ vị trí file script hiện tại.
+	 Tính di động: Cao. Khi gửi toàn bộ thư mục FarmProject cho người khác, đường dẫn vẫn hoạt động chính xác trên mọi máy tính mà không cần phải chỉnh sửa lại code.
+
+Phần 2: Giải pháp tối ưu và Giải thích
+
+Giải pháp tối ưu là sử dụng đường dẫn tương đối: ../data/logs.csv
+Ý nghĩa của ký hiệu .. trong đường dẫn:
+ Ký hiệu .. (hai dấu chấm) đại diện cho thư mục cha (thư mục ở cấp cao hơn một bậc) so với vị trí của file script Python đang chạy.
+ Cụ thể trong cấu trúc của An: File script đang nằm trong một thư mục con (ví dụ: D:\FarmProject\scripts\). Khi dùng .., Python sẽ "đi lùi" một cấp ra ngoài thư mục gốc FarmProject, sau đó tiếp tục đi vào thư mục data để tìm và đọc file logs.csv.
