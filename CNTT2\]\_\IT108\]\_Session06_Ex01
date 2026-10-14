@@ -1,0 +1,32 @@
+Phần 1: Phân tích
+1. Nguyên nhân máy tính bị "Not Responding" khi mở bằng Notepad
+Tràn bộ nhớ RAM và quá tải cơ chế xử lý: Các phần mềm soạn thảo văn bản giao diện đồ họa (GUI) truyền thống như Notepad hoạt động bằng cách tải toàn bộ nội dung tệp tin từ ổ cứng vào bộ nhớ RAM dưới dạng một chuỗi văn bản duy nhất trước khi hiển thị lên màn hình.
+
+Với một tệp log có dung lượng lớn (800MB), việc cố gắng nạp toàn bộ dữ liệu này vào bộ nhớ trong một thời gian ngắn khiến RAM bị quá tải, bộ xử lý (CPU) phải làm việc liên tục để phân tích định dạng và render văn bản, dẫn đến tình trạng treo máy (Not Responding).
+
+2. Nguyên nhân lệnh cat bị lỗi trên Windows CMD và lý do hoạt động trong PowerShell
+Trên Windows CMD (Command Prompt): Lệnh cat không tồn tại trong hệ thống lệnh gốc của CMD (vốn bắt nguồn từ các lệnh DOS cũ). Do đó, khi gõ cat, CMD không tìm thấy chương trình thực thi tương ứng và báo lỗi "command not found" (hoặc không nhận diện được lệnh).
+
+Trên PowerShell: Lệnh cat hoạt động hoàn toàn bình thường vì đây thực chất là một Alias (tên rút gọn) do PowerShell cung cấp sẵn để tương thích với các lệnh kiểu Unix/Linux. Khi người dùng gõ cat, PowerShell sẽ tự động ánh xạ và thực thi lệnh gốc tương ứng là cmdlet Get-Content.
+
+Phần 2: Hoàn thiện (Bộ lệnh chuẩn trên PowerShell)
+Để xử lý tệp dung lượng lớn một cách an toàn mà không làm treo hệ thống, ta sử dụng PowerShell với các cơ chế đọc luồng hoặc giới hạn số dòng:
+
+1. Xem toàn bộ nội dung tệp (Sử dụng cơ chế Stream / phân trang)
+Tránh dùng lệnh cat trực tiếp cho file quá lớn vì nó vẫn sẽ cố gắng đổ toàn bộ dữ liệu ra màn hình. Thay vào đó, ta dùng lệnh kết hợp với bộ lọc phân trang (Out-Host -Paging hoặc more) để hiển thị ngắt trang từng phần:
+
+PowerShell
+Get-Content server_log_800MB.log -ReadCount 1000 | Out-Host -Paging
+Hoặc sử dụng alias:
+
+PowerShell
+cat server_log_800MB.log | more
+2. Chỉ xem 10 dòng cuối cùng để kiểm tra lỗi mới nhất
+Sử dụng tham số -Tail giúp PowerShell chỉ đọc trực tiếp phần cuối của tệp từ ổ cứng mà không cần tải hay quét qua toàn bộ dung lượng 800MB bên trong RAM:
+
+PowerShell
+Get-Content server_log_800MB.log -Tail 10
+Hoặc sử dụng alias:
+
+PowerShell
+cat server_log_800MB.log -Tail 10
