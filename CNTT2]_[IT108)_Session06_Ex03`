@@ -1,0 +1,17 @@
+Phần 1: Phân tích luồng dữ liệu Pipeline
+Dưới đây là sơ đồ mô tả luồng truyền dữ liệu qua các bước trong Pipeline của PowerShell từ lúc đọc tệp đến khi trả về kết quả số lượng:
+
+Plaintext
+[ Đọc tệp tin ]           [ Lọc từ khóa ]               [ Loại trừ ngoại lệ ]         [ Đếm kết quả ]
+access.log  ──( Object )──>  Select-String -Pattern "TIMEOUT"  ──( Object )──>  Where-Object { -notmatch "NOT TIMEOUT" }  ──( Object )──>  (kết_quả).Count  ──>  [ Con số tổng duy nhất ]
+Phần 2: Triển khai câu lệnh PowerShell hoàn chỉnh
+Để thực hiện yêu cầu lọc sự cố TIMEOUT, xử lý bẫy dữ liệu (loại bỏ các dòng chứa NOT TIMEOUT) và trả về một con số tổng duy nhất bằng đúng 1 dòng lệnh trên PowerShell, ta sử dụng câu lệnh sau:
+
+PowerShell
+(Select-String -Path ".\access.log" -Pattern "TIMEOUT" | Where-Object { $_.Line -notmatch "NOT TIMEOUT" }).Count
+Giải thích chi tiết câu lệnh:
+Select-String -Path ".\access.log" -Pattern "TIMEOUT": Đọc tệp log và lọc ra toàn bộ các dòng chứa từ khóa TIMEOUT. Kết quả trả về là một tập hợp các đối tượng (Object) chứa thông tin dòng, số thứ tự và tên tệp.
+
+| Where-Object { $_.Line -notmatch "NOT TIMEOUT" }: Sử dụng toán tử chuyển tiếp (Pipeline) để lọc tiếp tập hợp trên, loại bỏ các dòng có chứa cụm từ NOT TIMEOUT để tránh đếm nhầm.
+
+(...) .Count: Lấy thuộc tính .Count của toàn bộ đối tượng sau khi đã lọc sạch sẽ để trả về một con số tổng số lượng sự cố duy nhất, đáp ứng đúng yêu cầu nghiệp vụ
