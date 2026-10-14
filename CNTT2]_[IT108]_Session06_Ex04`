@@ -1,0 +1,36 @@
+Phần 1: So sánh toán tử ghi đè và ghi nối tiếp
+Toán tử ghi đè (>):
+
+Cơ chế hoạt động trong PowerShell: Thực hiện ghi đè hoàn toàn nội dung mới lên tệp. Nếu tệp chưa tồn tại, hệ thống tự động tạo mới; nếu tệp đã tồn tại, toàn bộ dữ liệu cũ sẽ bị xóa sạch và thay thế bằng dữ liệu mới nhất.
+
+Rủi ro mất dữ liệu: Rất cao. Nếu chạy lặp lại hoặc sơ suất, toàn bộ lịch sử ghi nhật ký tích lũy từ trước sẽ bị xóa vĩnh viễn.
+
+Ngữ cảnh sử dụng thực tế: Phù hợp cho các báo cáo nhanh mang tính thời điểm, kết quả chạy một lần rồi bỏ, hoặc làm mới hoàn toàn tệp báo cáo cho một ca làm việc độc lập (như ca sáng hoặc ca chiều riêng biệt).
+
+Encoding file đầu ra: Mặc định sử dụng bảng mã UTF-16 (Unicode) do cơ chế của lệnh Out-File trong PowerShell.
+
+Toán tử ghi nối tiếp (>>):
+
+Cơ chế hoạt động trong PowerShell: Ghi nối tiếp dữ liệu mới vào cuối tệp sẵn có mà không làm mất đi các dữ liệu lịch sử đã lưu trước đó.
+
+Rủi ro mất dữ liệu: Thấp. An toàn hơn khi cần lưu trữ log tích lũy theo thời gian.
+
+Ngữ cảnh sử dụng thực tế: Thích hợp cho hệ thống giám sát hoạt động 24/7, nơi các sự kiện và lỗi cần được ghi nhận liên tục và cộng dồn theo giờ hoặc theo ngày.
+
+Encoding file đầu ra: Mặc định sử dụng bảng mã UTF-16 (Unicode) do cơ chế của lệnh Out-File trong PowerShell.
+
+Phần 2: Giải đáp bẫy dữ liệu cuối tháng
+Nếu gõ nhầm toán tử > thay vì >> vào ngày cuối tháng (khi tệp daily_report.txt đã tích lũy dữ liệu của 30 ngày trước đó), toàn bộ dữ liệu nhật ký lỗi của cả tháng sẽ bị xóa trắng ngay lập tức và chỉ còn lại kết quả của câu lệnh chạy trong thời điểm đó. Sự cố này bắt nguồn từ việc nhầm lẫn giữa cơ chế ghi đè và ghi nối tiếp.
+
+Phần 3: Lựa chọn giải pháp tối ưu cho hệ thống ghi nhật ký
+1. Giải pháp đề xuất
+Đối với yêu cầu ghi nhật ký lỗi phát sinh liên tục trong ngày, giải pháp tối ưu nhất là sử dụng lệnh Add-Content thay vì toán tử chuyển hướng >>, hoặc dùng lệnh Out-File -Append -Encoding utf8.
+
+Câu lệnh PowerShell được khuyến nghị:
+
+PowerShell
+Get-Content server.log | Select-String "ERROR" | ForEach-Object { $_.Line } | Add-Content -Path "daily_report.txt" -Encoding utf8
+2. Lý do lựa chọn
+Kiểm soát Encoding chặt chẽ: Lệnh Add-Content cho phép chỉ định rõ ràng tham số -Encoding utf8, giúp tệp nhật ký hiển thị đúng định dạng tiếng Việt và tương thích hoàn toàn với các trình soạn thảo mã nguồn như VS Code hay Notepad, khắc phục nhược điểm mã hóa UTF-16 mặc định của Out-File.
+
+Bảo vệ dữ liệu an toàn: Cơ chế nối tiếp giúp bảo toàn các dòng log cũ, loại bỏ triệt để rủi ro mất mát dữ liệu do sơ suất gõ nhầm ký tự.
