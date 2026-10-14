@@ -1,0 +1,49 @@
+Phần 1: Thiết kế kiến trúc PowerShell Script
+Để xây dựng một tập lệnh tự động hóa xử lý log hiệu quả, tệp script auto_report.ps1 được chia thành 4 khối cấu trúc chính rõ ràng như sau:
+
+1. Header Block (Khối tiêu đề):
+
+Nội dung: Chứa thông tin mô tả về tên script, tác giả, ngày tạo và mục đích sử dụng, được đặt bên trong các dòng chú thích (comment bắt đầu bằng ký tự #) để người quản trị dễ dàng nắm bắt thông tin tổng quan khi đọc mã nguồn.
+
+2. Biến cấu hình (Configuration Variables):
+
+Nội dung: Khai báo các đường dẫn tệp tin quan trọng thông qua cú pháp biến bắt đầu bằng dấu đô la ($), giúp dễ dàng thay đổi đường dẫn nguồn và đích mà không cần phải sửa đổi trực tiếp bên trong logic luồng xử lý.
+
+3. Thông báo tiến trình (Progress Notification):
+
+Nội dung: Sử dụng lệnh Write-Host để in ra màn hình terminal các thông báo trạng thái trực quan trong suốt quá trình chạy script, giúp kỹ sư theo dõi được từng bước thực thi mà không làm ảnh hưởng hay lẫn lộn vào dữ liệu bên trong tệp kết quả.
+
+4. Logic xử lý (Processing Logic):
+
+Nội dung: Thực hiện đọc nội dung tệp log nguồn thông qua lệnh Get-Content, lọc các dòng chứa mã lỗi 404 bằng công cụ Select-String, đồng thời ghi dòng tiêu đề và kết quả nối tiếp vào tệp báo cáo tổng hợp.
+
+Phần 2: Sản phẩm mã nguồn Script hoàn chỉnh (auto_report.ps1)
+Dưới đây là nội dung hoàn chỉnh của tệp mã nguồn auto_report.ps1:
+
+PowerShell
+<#
+    .SYNOPSIS
+        Script tự động lọc lỗi 404 từ file access.log và xuất ra báo cáo hằng ngày.
+    .AUTHOR
+        Pham Tuan Linh
+    .DATE
+        2026-10-14
+#>
+
+# Khai báo biến cấu hình đường dẫn
+$logSource = ".\access.log"
+$reportFile = "daily_report.txt"
+
+# Thông báo tiến trình khởi động
+Write-Host "=== Bat dau qua trinh xu ly log ===" -ForegroundColor Cyan
+Write-Host "Dang doc du lieu tu tep nguon: $logSource" -ForegroundColor Yellow
+
+# Tạo dòng tiêu đề (Header) yêu cầu vào tệp báo cáo đầu ra
+"=== HE THONG TU DONG LOC LOG ===" | Out-File -FilePath $reportFile -Encoding utf8
+
+# Tiến hành đọc log, lọc mã lỗi 404 qua Pipeline và ghi nối tiếp vào tệp báo cáo
+Get-Content -Path $logSource | Select-String -Pattern "404" | ForEach-Object { $_.Line } | Add-Content -Path $reportFile -Encoding utf8
+
+# Thông báo hoàn thành tiến trình
+Write-Host "Da xu ly va ghi bao cao thanh cong vao tep: $reportFile" -ForegroundColor Green
+Write-Host "=== Hoan tat qua trinh ===" -Fo
