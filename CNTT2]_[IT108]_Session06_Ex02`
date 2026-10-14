@@ -1,0 +1,38 @@
+Phần 1: Phân tích sự nhầm lẫn của An
+1. Nhầm lẫn về mặt tư duy
+An đang gặp sự nhầm lẫn cơ bản giữa hai thao tác quản trị hệ thống hoàn toàn khác nhau:
+
+Tìm kiếm tệp tin (File Location/Discovery): Đi tìm xem tệp nào (hoặc thư mục nào) nằm ở đâu trên hệ thống dựa vào tên, định dạng hoặc từ khóa có trong tên tệp.
+
+Tìm kiếm nội dung (Text/Content Search): Đọc sâu vào bên trong dữ liệu của một hoặc nhiều tệp để trích xuất ra các dòng văn bản chứa từ khóa cụ thể.
+
+2. Sự khác biệt giữa Get-ChildItem và Select-String
+Get-ChildItem (thường viết tắt là gci hoặc ls):
+
+Chức năng: Dùng để liệt kê danh sách các tệp tin và thư mục có trong một đường dẫn chỉ định.
+
+Hạn chế trong trường hợp này: Khi An dùng tham số -Filter "*404*", PowerShell chỉ đi tìm các tệp tin có tên chứa chữ 404 (ví dụ: 404_error.log), chứ không hề quét nội dung bên trong tệp access.log. Do đó, nếu tệp mang tên là access.log, lệnh này hoàn toàn bỏ qua và không trả về kết quả nào.
+
+Select-String (tương đương với lệnh grep trên Linux/Git Bash):
+
+Chức năng: Chuyên dùng để quét, tìm kiếm văn bản và nội dung bên trong các tệp tin.
+
+Ưu điểm: Cho phép lọc ra chính xác các dòng log ghi nhận mã lỗi hoặc từ khóa mà kỹ sư cần phân tích mà không cần quan tâm đến tên tệp.
+
+Phần 2: Hoàn thiện câu lệnh PowerShell
+Để lọc từ khóa error (không phân biệt chữ hoa/thường) bên trong tệp access.log kèm theo hiển thị số thứ tự dòng, ta sử dụng câu lệnh chuẩn trên PowerShell như sau:
+
+PowerShell
+Select-String -Path ".\access.log" -Pattern "error"
+Giải thích chi tiết câu lệnh:
+Select-String: Lệnh cốt lõi của PowerShell dùng để tìm kiếm chuỗi văn bản bên trong tệp.
+
+-Path ".\access.log": Chỉ định đường dẫn đến tệp log cần kiểm tra (trong thư mục hiện tại).
+
+-Pattern "error": Từ khóa cần tìm kiếm (lọc các dòng chứa chữ "error").
+
+Mặc định của Select-String:
+
+Không phân biệt hoa/thường (Case-insensitive), do đó câu lệnh trên sẽ bắt được cả error, ERROR, Error,... đúng theo yêu cầu.
+
+Tự động in kèm số thứ tự dòng (Line number) và tên tệp ở đầu mỗi dòng kết quả trả về, giúp kỹ sư dễ dàng định vị lỗi trong tệp log lớn.
