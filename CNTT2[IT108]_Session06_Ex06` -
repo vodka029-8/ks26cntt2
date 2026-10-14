@@ -1,0 +1,68 @@
+Phần 1: Phân tích và Thẩm định mã nguồn AI gợi ý
+1. Phân tích đoạn script độc hại từ AI gợi ý
+Đoạn mã do AI cung cấp:
+
+PowerShell
+Remove-Item -Path "C:\*" -Recurse -Force
+Write-Host "Da don dep xong!"
+2. Giải thích ý nghĩa các tham số
+-Path "C:\*": Chỉ định đường dẫn mục tiêu là toàn bộ thư mục gốc và tất cả các tệp tin, thư mục con nằm ngay bên trong ổ đĩa hệ thống C:\.
+
+-Recurse: Kích hoạt chế độ đệ quy (duyệt sâu), bắt buộc PowerShell quét và xóa toàn bộ các tệp tin cũng như các thư mục con, cháu,... nằm bên trong mọi cấp độ thư mục con của ổ C:\.
+
+-Force: Buộc xóa ngay lập tức mà không cần hỏi lại xác nhận, kể cả các tệp tin đang ở trạng thái ẩn (hidden), tệp hệ thống (system files) hoặc tệp đang bị khóa/chỉ đọc (read-only).
+
+3. Hậu quả thảm khốc nếu chạy đoạn script trên
+Nếu thực thi đoạn script này trên máy chủ, hệ thống sẽ xóa sạch toàn bộ dữ liệu trên ổ đĩa C:\, bao gồm hệ điều hành Windows, các phần mềm ứng dụng, cơ sở dữ liệu quan trọng và toàn bộ mã nguồn của dự án "Trang trại Lan thông minh". Máy chủ sẽ bị sập hoàn toàn (Crash/Brick hệ thống) và không thể khởi động lại được nữa.
+
+4. Áp dụng 3 Nguyên tắc "Vàng" thẩm định mã AI
+Nguyên tắc 1: Không bao giờ chạy trực tiếp mã nguồn chưa kiểm duyệt (Never Run Untrusted Code): Luôn phải đọc hiểu và phân tích kỹ từng dòng lệnh trước khi đưa vào môi trường thực tế, đặc biệt là các lệnh có khả năng ghi hoặc xóa dữ liệu.
+
+Nguyên tắc 2: Kiểm tra phạm vi tác động (Check Scope & Boundary): Xác định rõ lệnh tác động ở đâu (tệp cục bộ trong dự án hay toàn bộ ổ cứng hệ thống). Tuyệt đối tránh sử dụng các ký tự đại diện quét rộng như C:\* hoặc đường dẫn hệ thống tối cao.
+
+Nguyên tắc 3: Luôn thử nghiệm trên môi trường giả lập/an toàn (Test in Safe Environment): Đối với các script thao tác mạnh như xóa tệp, cần chạy thử nghiệm với các tham số kiểm tra (như -WhatIf) để xem trước hành vi của lệnh trước khi áp dụng chính thức.
+
+Phần 2: Triển khai Script An toàn (safe_cleanup.ps1)
+Dưới đây là nội dung hoàn chỉnh của tệp script safe_cleanup.ps1 tuân thủ tuyệt đối nguyên tắc khoanh vùng đường dẫn và xử lý an toàn:
+
+PowerShell
+<#
+    .SYNOPSIS
+        Script dọn dẹp và phân tích log an toàn cho hệ thống "Trang trại Lan thông minh".
+    .AUTHOR
+        Pham Tuan Linh
+    .DATE
+        2026-10-14
+#>
+
+# 1. Di chuyển đến thư mục logs của dự án bằng Set-Location (tương đương cd)
+Set-Location -Path ".\logs"
+
+# 2. Lọc các dòng có chữ "WARNING" từ tệp system.log ra tệp issues.txt bằng Select-String
+Select-String -Path ".\system.log" -Pattern "WARNING" | ForEach-Object { $_.Line } | Out-File -FilePath "..\issues.txt" -Encoding utf8
+
+# Trở về thư mục gốc dự án để thực hiện dọn dẹp đúng phạm vi
+Set-Location -Path ".."
+
+# 3. Chỉ xóa các tệp .tmp bên trong thư mục dự án bằng Remove-Item có phạm vi giới hạn rõ ràng
+Remove-Item -Path ".\*.tmp" -Force
+Phần 3: Kiểm thử và Xác thực kết quả trên PowerShell
+Để kiểm tra và xác nhận script đã chạy đúng đắn và an toàn, ta thực hiện các câu lệnh kiểm tra trực tiếp trên terminal của PowerShell:
+
+Kiểm tra nội dung tệp báo cáo lỗi issues.txt:
+
+PowerShell
+Get-Content -Path ".\issues.txt"
+Mục đích: Dùng để xem trực tiếp các dòng cảnh báo WARNING đã được trích xuất thành công sang tệp báo cáo.
+
+Kiểm tra xem tệp báo cáo đã thực sự tồn tại hay chưa (Kiểm tra nhanh bằng Test-Path):
+
+PowerShell
+Test-Path ".\issues.txt"
+Mục đích: Lệnh trả về kết quả True (nếu tệp đã được tạo thành công) hoặc False (nếu chưa có), giúp xác thực nhanh tính toàn vẹn của tiến trình.
+
+Liệt kê lại thư mục để xác nhận các tệp .tmp đã bị xóa sạch:
+
+PowerShell
+Get-ChildItem -Path ".*"
+Mục đích: Rà soát lại danh sách tệp tin trong thư mục dự án để đảm bảo các tệp tạm (.tmp) đã được dọn dẹp sạch sẽ, đồng thời các tệp mã nguồn quan trọng khác vẫn được bảo vệ nguyên vẹn.
