@@ -1,0 +1,16 @@
+Dưới đây là lời giải chi tiết và hướng dẫn từng bước để hoàn thành **Bài 1: Chuẩn hóa Heading Styles cho tài liệu SRS** trong Buổi 11 môn Nhập Môn Công Nghệ Thông Tin trên hệ thống LMS của Rikkei Education:
+
+---
+
+1. **Phần 1: Phân tích lỗi sai của Nam:**
+* **Tại sao định dạng thủ công gây lỗi mục lục:** Khi dùng cách chỉnh font thủ công (in đậm, phóng to chữ), Word không nhận diện được đâu là tiêu đề (Heading) cấu trúc văn bản. Do đó, tính năng Auto TOC (Mục lục tự động) quét văn bản không tìm thấy mốc phân cấp nào, dẫn đến thông báo lỗi *"No table of contents entries found"* hoặc bảng mục lục để trống. Đồng thời, việc đổi màu tiêu đề thủ công bắt buộc phải sửa từng trang một rất mất thời gian.
+* **Nguyên nhân đoạn văn hiển thị trong mục lục:** Nam đã vô tình quét khối và gán nhãn **Heading 1** cho cả một đoạn văn bản dài 5 trang thay vì chỉ chọn tiêu đề ngắn (ví dụ: *1. Giới thiệu*). Mục lục tự động lấy toàn bộ nội dung nằm dưới nhãn Heading đưa lên, khiến mục lục hiện cả một đoạn văn bản dài.
+
+
+2. **Phần 2: Hướng dẫn sửa lỗi và chuẩn hóa tài liệu:**
+1. **Bôi đen tiêu đề chính** (ví dụ: *1. Giới thiệu*, *2. Phạm vi hệ thống*) trên file Word và chọn **Heading 1** trên thanh công cụ Ribbon (tab *Home*).
+2. **Bôi đen tiểu mục** (ví dụ: *1.1. Mục tiêu*, *2.1. Chức năng*) và gán nhãn **Heading 2**. Kiểm tra để đảm bảo không có đoạn văn bản nội dung nào bị nhầm lẫn gắn nhãn Heading.
+3. **Tạo và cập nhật Mục lục tự động (Auto TOC):**
+* Đặt con trỏ chuột tại vị trí cần đặt mục lục.
+* Vào tab **References** -> Chọn **Table of Contents** -> Chọn mẫu mục lục tự động (Automatic Table).
+* Nhấn chuột phải vào bảng mục lục vừa tạo và chọn **Update Field** -> Chọn **Update entire table** để cập nhật chính xác số trang sau khi đã bổ sung nội dung.
